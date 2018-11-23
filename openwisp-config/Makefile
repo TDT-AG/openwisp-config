@@ -98,6 +98,10 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		files/sbin/openwisp-get-address.lua \
 		$(1)/usr/sbin/openwisp-get-address
 
+	$(INSTALL_BIN) \
+		files/sbin/openwisp-update-firmware \
+		$(1)/usr/sbin/openwisp-update-firmware
+
 	$(CP) ../VERSION $(1)/etc/openwisp/
 endef
 

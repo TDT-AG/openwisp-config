@@ -1,0 +1,68 @@
+#!/bin/sh
+
+# read config options
+SERVER="$(uci get openwisp.http.firmware_server)"
+VERSION="$(uci get openwisp.http.firmware_version)"
+# get DISTRIB_RELEASE
+. /etc/openwrt_release
+# get IMAGE_NAME
+IMAGE_NAME=$(cat /etc/image_name)
+# get DEVICE_PRODUCT
+. /etc/device_info
+# remove firmware image
+FIRMWARE_PATH="/tmp/ow2_fw.bin"
+rm -f "$FIRMWARE_PATH"
+
+if [ -n "$VERSION" ]; then
+	if [ "$VERSION" != "$DISTRIB_RELEASE" ]; then
+		# target firmware is not installed -> get url, download fw
+		if [ -n "$SERVER" ]; then
+			URL="${SERVER}/${VERSION}/${DEVICE_PRODUCT}/${IMAGE_NAME}/firmware.bin"
+		else
+			logger "Firmware server is not set" \
+				-t openwisp \
+				-p daemon.info
+			exit 1
+		fi
+		if [ -n "$URL" ]; then
+			logger "Downloading firmware from: $URL" \
+				-t openwisp \
+				-p daemon.info
+			curl -f "$URL" -o "$FIRMWARE_PATH"
+			if [ $? -eq 0 ]; then
+				sysupgrade -T "$FIRMWARE_PATH"
+				if [ $? -eq 0 ]; then
+					logger "Installing firmware version: $VERSION" \
+						-t openwisp \
+						-p daemon.info
+					sysupgrade "$FIRMWARE_PATH"
+				else
+					logger "Downloaded firmware file is not valid" \
+						-t openwisp \
+						-p daemon.info
+					exit 1
+				fi
+			else
+				logger "Firmware file could not be downloaded" \
+					-t openwisp \
+					-p daemon.info
+				exit 1
+			fi
+		else
+			logger "Firmware URL could not be determined" \
+				-t openwisp \
+				-p daemon.info
+			exit 1
+		fi
+	else
+		logger "Firmware version $VERSION is already installed" \
+			   -t openwisp \
+			   -p daemon.info
+		exit 0
+	fi
+else
+	logger "Target firmware version is not set" \
+		-t openwisp \
+		-p daemon.info
+	exit 1
+fi

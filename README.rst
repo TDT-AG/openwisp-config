@@ -82,6 +82,8 @@ UCI configuration options must go in ``/etc/config/openwisp``.
 - ``pre_reload_hook``: path to custom executable script, see `pre-reload-hook`_
 - ``post_reload_hook``: path to custom executable script, see `post-reload-hook`_
 - ``post_registration_hook``: path to custom executable script, see `post-registration-hook`_
+- ``firmware_server``: base url to the server hosting the firmware images, see `Firmware-Update`_
+- ``firmware_version``: target firmware version, see `Firmware-Update`_
 
 Automatic registration
 ----------------------
@@ -250,6 +252,24 @@ post-registration-hook
 Defaults to ``/etc/openwisp/post-registration-hook``;
 
 Path to an executable script that will be called after the registration is completed.
+
+Firmware-Update
+---------------
+
+The script ``openwisp-update-firmware`` can be used to perform a firmware update. For this
+feature, the options ``firmware_server`` and ``firmware_version`` need to be set in ``/etc/config/openwisp``.
+
+``firmware_server`` should contain the base url to the server hosting the firmware images,
+for example ``http://myserver.com:8000``.
+
+``firmware_version`` should contain the target firmware version which should be installed.
+``openwisp-config`` checks if it is already installed and performs an update otherwise.
+
+``openwisp-update-firmware`` can be configured as a hook script and is then able to update the
+firmware if ``firmware_version`` is set to a value different to the current firmware version.
+
+To test the functionality, a local httpd can be run in the relevant directory by running
+``python -m SimpleHTTPServer 8000``.
 
 Compiling openwisp-config
 -------------------------
