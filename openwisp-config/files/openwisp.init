@@ -82,8 +82,7 @@ reload_service() {
 			break
 		fi
 	done
-	# ensure control file is removed
-	rm "$CONTROL_FILE"
-	# reload
-    start
+	rm -f "$CONTROL_FILE"
+
+	start
 }
